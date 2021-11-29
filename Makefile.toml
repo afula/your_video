@@ -1,0 +1,26 @@
+[tasks.build]
+dependencies = ["build_styles"]
+command = "trunk"
+args = ["build", "--release"]
+
+[tasks.build_dirs]
+command = "mkdir"
+args = ["-p", "pre/rsrc/styles"]
+
+[tasks.build_styles]
+dependencies = ["build_tailwind"]
+
+[tasks.build_tailwind]
+dependencies = ["build_dirs"]
+command = "sh"
+args = ["-c", "npx tailwindcss -i rsrc/styles/tailwind.css -o pre/rsrc/styles/tailwind.css"]
+
+[tasks.serve]
+dependencies = ["build"]
+command = "trunk"
+args = ["serve", "--no-autoreload"]
+
+[tasks.watch]
+dependencies = ["build"]
+command = "trunk"
+args = ["watch"]

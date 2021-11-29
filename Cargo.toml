@@ -1,0 +1,80 @@
+[package]
+name = "omnivyou"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0"
+gloo-events = "0.1"
+js-sys = "0.3"
+# # Forked version to support non-standard FileSystemAccess API.
+# js-sys = { git = "https://github.com/nicholaschiasson/wasm-bindgen" }
+log = "0.4"
+serde = "1.0"
+wasm-bindgen = "0.2"
+# # Forked version to support non-standard FileSystemAccess API.
+# wasm-bindgen = { git = "https://github.com/nicholaschiasson/wasm-bindgen" }
+wasm-bindgen-futures = "0.4"
+# # Forked version to support non-standard FileSystemAccess API.
+# wasm-bindgen-futures = { git = "https://github.com/nicholaschiasson/wasm-bindgen" }
+wasm-logger = "0.2"
+yew = "0.18"
+yew-octicons = "0.2"
+yew-router = "0.15"
+yewtil = { version = "0.4", features = [ "future" ]}
+futures = "0.3"
+
+[dependencies.web-sys]
+version = "0.3.55"
+features = [
+    'Window',
+    'Navigator',
+    'MediaDevices',
+    'AudioContext',
+    'MediaRecorder',
+    'MediaStream',
+    'MediaRecorderOptions',
+    'AudioDestinationNode',
+    'AudioNode',
+    'AudioParam',
+    'GainNode',
+    'OscillatorNode',
+    'OscillatorType',
+    'MediaStreamConstraints'
+]
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+
+# # Forked version to support non-standard FileSystemAccess API.
+# [patch.crates-io]
+# js-sys = { git = "https://github.com/nicholaschiasson/wasm-bindgen" }
+# wasm-bindgen = { git = "https://github.com/nicholaschiasson/wasm-bindgen" }
+
+# # Forked version to support non-standard FileSystemAccess API.
+# [patch.crates-io.web-sys]
+# git = "https://github.com/nicholaschiasson/wasm-bindgen"
+# features = [
+# 	"DirectoryPickerOptions",
+# 	"FilePickerAcceptType",
+# 	"FilePickerOptions",
+# 	"FileSystemCreateWritableOptions",
+# 	"FileSystemDirectoryHandle",
+# 	"FileSystemFileHandle",
+# 	"FileSystemGetDirectoryOptions",
+# 	"FileSystemGetFileOptions",
+# 	"FileSystemHandle",
+# 	"FileSystemHandleKind",
+# 	"FileSystemHandlePermissionDescriptor",
+# 	"FileSystemPermissionDescriptor",
+# 	"FileSystemPermissionMode",
+# 	"FileSystemRemoveOptions",
+# 	"FileSystemWritableFileStream",
+# 	"OpenFilePickerOptions",
+# 	"SaveFilePickerOptions",
+# 	"WellKnownDirectory",
+# 	"WriteCommandType",
+# 	"WriteParams",
+# ]

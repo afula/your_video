@@ -1,0 +1,121 @@
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  preprocess:
+    runs-on: ubuntu-latest
+    container:
+      image: node:14-alpine
+    name: Preprocess
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Preprocess
+        run: npx tailwindcss -i rsrc/styles/tailwind.css -o pre/rsrc/styles/tailwind.css
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: pre
+          path: pre
+  check:
+    runs-on: ubuntu-latest
+    container:
+      image: rust:1.55
+    name: Check
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Check
+        run: cargo check
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: rust:1.55
+    name: Test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Test
+        run: cargo test
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: rust:1.55
+    name: Build
+    needs: [preprocess]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: pre
+          path: pre
+      - name: Build
+        run: rustup target add wasm32-unknown-unknown && cargo install --locked --version 0.14.0 trunk && trunk build --release
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: dist
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    needs: [build, check, test]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: dist
+          path: dist
+      - name: CNAME
+        run: echo omnivyou.com > dist/CNAME
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@4.1.5
+        with:
+          branch: gh-pages
+          folder: dist
+  tag:
+    runs-on: ubuntu-latest
+    name: Tag
+    needs: [build, check, preprocess, test]
+    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && (success() || failure()) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Check semver bump
+        id: check-semver
+        run: |
+          if [[ "${{ github.event.head_commit.message }}" =~ ^Merge\ pull\ request\ #[0-9]+\ from\ [^/]+/patch/.+$ ]]; then
+            echo ::set-output name=semver::patch
+          elif [[ "${{ github.event.head_commit.message }}" =~ ^Merge\ pull\ request\ #[0-9]+\ from\ [^/]+/major/.+$ ]]; then
+            echo ::set-output name=semver::major
+          else
+            echo ::set-output name=semver::minor
+          fi
+      - name: Bump major version and push tag
+        if: ${{ steps.check-semver.outputs.semver == 'major' }}
+        uses: anothrNick/github-tag-action@1.17.2
+        env:
+          DEFAULT_BUMP: major
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Bump minor version and push tag
+        if: ${{ steps.check-semver.outputs.semver == 'minor' }}
+        uses: anothrNick/github-tag-action@1.17.2
+        env:
+          DEFAULT_BUMP: minor
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Bump patch version and push tag
+        if: ${{ steps.check-semver.outputs.semver == 'patch' }}
+        uses: anothrNick/github-tag-action@1.17.2
+        env:
+          DEFAULT_BUMP: patch
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
